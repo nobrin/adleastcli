@@ -7,7 +7,7 @@ Therefore, it fits when you want to use AD on short usage.
 __author__ = "Nobuo Okazaki"
 __version__ = "0.0.1"
 __license__ = "MIT License"
- 
+
 import ldap3
 
 # --- Exceptions
@@ -56,6 +56,13 @@ class UserManager(object):
         # Set password for user
         user_dn = self.get_user_dn(username)
         if not self.conn.extend.microsoft.modify_password(user_dn, password):
+            raise UserOperationFailed(self.conn.result)
+        return True
+
+    def change_user_password(self, username, newpw, oldpw):
+        # Change user password (as a general user)
+        user_dn = self.get_user_dn(username)
+        if not ldap3.extend.microsoft.modifyPassword.ad_modify_password(self.conn, user_dn, newpw, oldpw, controls=None):
             raise UserOperationFailed(conn.result)
         return True
 
@@ -137,18 +144,30 @@ if __name__ == "__main__":
         p = args.target_args
         if args.target == "user":
             if not p: mgr.list("user")
+            elif p[0] == "setpw":
+                mgr.set_user_password(p[1], p[2])
+                sys.stderr.write("New password set.\n")
+            elif p[0] == "passwd":
+                oldpw = ADM_PASS
+                newpw = getpass("Enter new password: ")
+                newpw_confirm = getpass("Confirm new password: ")
+                if newpw != newpw_confirm:
+                    sys.stderr.write("New passwords does not match.\n")
+                    sys.exit(1)
+                mgr.change_user_password(ADM_USER, newpw, oldpw)
+                sys.stderr.write("Password changed.\n")
             elif p[0] == "create":
                 mgr.create_user(p[1], p[2])
-                sys.stderr.write("User '{}' has been created.\n".format(p[1]))
+                sys.stderr.write("User '{}' created.\n".format(p[1]))
             elif p[0] == "delete":
                 mgr.delete_object(p[1])
-                sys.stderr.write("User '{}' has been deleted.\n".format(p[1]))
+                sys.stderr.write("User '{}' deleted.\n".format(p[1]))
             elif p[0] == "join":
                 mgr.add_member_to_group(p[1], p[2])
-                sys.stderr.write("User '{}' has been added to Group '{}'.\n".format(p[1], p[2]))
+                sys.stderr.write("User '{}' added to Group '{}'.\n".format(p[1], p[2]))
             elif p[0] == "leave":
                 mgr.remove_member_from_group(p[1], p[2])
-                sys.stderr.write("User '{}' has been removed from Group '{}'.\n".format(p[1], p[2]))
+                sys.stderr.write("User '{}' removed from Group '{}'.\n".format(p[1], p[2]))
             elif p[0] == "info": mgr.info("user", p[1])
             else:
                 sys.stderr.write("Invalid arg\n")
