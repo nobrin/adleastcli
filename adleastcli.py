@@ -123,14 +123,56 @@ if __name__ == "__main__":
     import sys, argparse
     from getpass import getpass
 
-    parser = argparse.ArgumentParser(description="AD Util")
-    parser.add_argument("target", choices=["user", "group"])
-    parser.add_argument("target_args", metavar="ARGS", type=str, nargs="*")
-    parser.add_argument("-S", dest="domain", required=True)
-    parser.add_argument("-U", dest="adm_user", default="Administrator")
+    EPILOG = """example:
+    Create a user
+    $ adleastcli -S example.com user create testuser Password123#
+
+    Create a group
+    $ adleastcli -S example.com group create mygroup
+
+    Add the user to the group
+    $ adleastcli -S example.com user join testuser mygroup
+
+    Remove the user from the group
+    $ adleastcli -S example.com user leave testuser mygroup
+
+    Delete a group
+    $ adleastcli -S example.com group delete mygroup
+
+    Delete a user
+    $ adleastcli -S example.com user delete testuser
+
+    List users
+    $ adleastcli -S example.com user
+
+    Show user details
+    $ adleastcli -S example.com user info testuser
+
+    List groups
+    $ adleastcli -S example.com group
+
+    Show group details
+    $ adleastcli -S example.com group info mygroup
+
+    Set password(as administrator)
+    $ adleastcli -S example.com user setpw testuser NewPass123#
+
+    Change password(as a user)
+    $ adleastcli -S example.com -U testuser user passwd
+    """
+
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description="ADLeastCLI: AD User Manager",
+        epilog=EPILOG
+    )
+    parser.add_argument("target", choices=["user", "group"], help="Operation target")
+    parser.add_argument("target_args", metavar="ARGS", type=str, nargs="*", help="Operation arguments")
+    parser.add_argument("-S", dest="domain", required=True, help="Domain (required)")
+    parser.add_argument("-U", dest="user", default="Administrator", help="Operator username (default: Administrator)")
     args = parser.parse_args()
 
-    ADM_USER = args.adm_user
+    ADM_USER = args.user
     ADM_PASS = getpass("Enter password for {}: ".format(ADM_USER))
 
     mgr = UserManager(args.domain)

@@ -18,6 +18,7 @@ setup(
     description      = "Simple user management CLI for Active Directory",
     long_description = open("README.rst").read(),
     author           = "Nobuo Okazaki",
+    author_email     = "nobrin@biokids.org",
     url              = "https://github.com/nobrin/adleastcli",
     zip_safe         = False,
     install_requires = ["ldap3"],
