@@ -51,3 +51,13 @@ Example::
     Enter password for testuser:
     Enter new password:
     Confirm new password:
+
+Installation
+============
+
+Install the latest release with ``pip install adleastcli`` or simply downloading
+`adleastcli <https://github.com/nobrin/adleastcli/raw/master/adleastcli.py>`_.
+
+Installing with ``pip`` store ``adleastcli`` to your bin path, but it is only
+copy of ``adleastcli.py``. If you get ``adleastcli.py`` with downloading, you
+can rename it to ``adleastcli``.
