@@ -51,6 +51,9 @@ Example::
     Enter password for testuser:
     Enter new password:
     Confirm new password:
+    
+    Start WebUI server for changing password by oneself
+    $ adleastcli -S example.com -b 0.0.0.0:8080 httpd
 
 Installation
 ============
