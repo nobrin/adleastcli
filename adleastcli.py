@@ -5,7 +5,7 @@ It has simply essential functions and makes to manage users/groups on AD without
 Therefore, it fits when you want to use AD on short usage.
 """
 __author__ = "Nobuo Okazaki"
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __license__ = "MIT License"
 
 import ldap3
