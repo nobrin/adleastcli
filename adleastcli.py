@@ -5,9 +5,10 @@ It has simply essential functions and makes to manage users/groups on AD without
 Therefore, it fits when you want to use AD on short usage.
 """
 __author__ = "Nobuo Okazaki"
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 __license__ = "MIT License"
 
+from datetime import datetime
 import ldap3
 
 # --- Exceptions
@@ -15,6 +16,8 @@ class UserOperationFailed(Exception): pass
 
 # --- Main Class
 class UserManager(object):
+    DAY0 = datetime(1601, 1, 1)
+
     def __init__(self, domain, host=None):
         self.domain = domain
         self.host = host or self.domain
@@ -109,12 +112,27 @@ class UserManager(object):
             print(attr["cn"])
 #            print("{:20} {}".format(attr["cn"], attr.get("description", [""])[0]))
 
+    def set_user_attribute(self, username, attrname, value):
+        # Set attribute
+        dn = self.get_user_dn(username)
+        self.conn.modify(dn, {attrname: [(ldap3.MODIFY_REPLACE, [value])]})
+
+    def get_attrs(self, category, common_name):
+        # Get attributes of specified object
+        search_base = "CN=Users," + self.domain_dn
+        search_filter = f"(&(objectCategory={category})(cn={common_name}))"
+        self.conn.search(search_base, search_filter, attributes=ldap3.ALL_ATTRIBUTES)
+        return self.conn.response[0]["attributes"]
+
     def info(self, category, common_name):
         # Show information of specified object
+        """
         search_base = "CN=Users," + self.domain_dn
         search_filter = "(&(objectCategory={})(cn={}))".format(category, common_name)
         self.conn.search(search_base, search_filter, attributes=ldap3.ALL_ATTRIBUTES)
         info = self.conn.response[0]["attributes"]
+        """
+        info = self.get_attrs(category, common_name)
         print("CN: {}".format(info.pop("cn")))
         for k, v in sorted(info.items()):
             print("  {:20}{}".format(k, v))
