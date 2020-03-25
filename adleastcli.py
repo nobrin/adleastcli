@@ -5,7 +5,7 @@ It has simply essential functions and makes to manage users/groups on AD without
 Therefore, it fits when you want to use AD on short usage.
 """
 __author__ = "Nobuo Okazaki"
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 __license__ = "MIT License"
 
 from datetime import datetime
@@ -17,6 +17,7 @@ class UserOperationFailed(Exception): pass
 # --- Main Class
 class UserManager(object):
     DAY0 = datetime(1601, 1, 1)
+    DAY1 = datetime(1970, 1, 1)
 
     def __init__(self, domain, host=None):
         self.domain = domain
@@ -112,10 +113,16 @@ class UserManager(object):
             print(attr["cn"])
 #            print("{:20} {}".format(attr["cn"], attr.get("description", [""])[0]))
 
-    def set_user_attribute(self, username, attrname, value):
+    def set_user_attr(self, username, attrname, value):
         # Set attribute
         dn = self.get_user_dn(username)
         self.conn.modify(dn, {attrname: [(ldap3.MODIFY_REPLACE, [value])]})
+
+    def set_user_expires(self, username, dt):
+        # Set accountExpires with datetime object
+        delta = self.DAY1 - self.DAY0
+        ex = (dt.timestamp() + delta.total_seconds()) * 10000000
+        self.set_user_attr(username, "accountExpires", f"{int(ex):d}")
 
     def get_attrs(self, category, common_name):
         # Get attributes of specified object
@@ -371,6 +378,13 @@ if __name__ == "__main__":
                     sys.exit(1)
                 mgr.change_user_password(ADM_USER, newpw, oldpw)
                 sys.stderr.write("Password changed.\n")
+            elif p[0] == "set":
+                if p[1] == "expires":
+                    dt = datetime.strptime(p[3], "%Y-%m-%d %H:%M:%S")
+                    mgr.set_user_expires(p[2], dt)
+                else:
+                    sys.stderr.write("Only expires can be changed.\n")
+                    sys.exit(1)
             elif p[0] == "create":
                 mgr.create_user(p[1], p[2])
                 sys.stderr.write("User '{}' created.\n".format(p[1]))
