@@ -122,6 +122,7 @@ class UserManager(object):
         search_base = "CN=Users," + self.domain_dn
         search_filter = f"(&(objectCategory={category})(cn={common_name}))"
         self.conn.search(search_base, search_filter, attributes=ldap3.ALL_ATTRIBUTES)
+        if not self.conn.response: return None
         return self.conn.response[0]["attributes"]
 
     def info(self, category, common_name):
