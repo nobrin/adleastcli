@@ -211,8 +211,13 @@ def start_web_server(mgr, bind_addr):
             try:
                 mgr.connect(cn, obj["cur"])
                 mgr.change_user_password(cn, obj["npw"], obj["cur"])
+            except ldap3.core.exceptions.LDAPBindError:
+                raise _APIErrorResponse("Username and password didn't match.")
             except UserOperationFailed as e:
-                raise _APIErrorResponse(str(e))
+                # パスワード制約などで失敗した場合
+                try: msg = e.args[0]["message"]
+                except Exception: raise _APIErrorResponse(str(e))
+                raise _APIErrorResponse(msg)
             except Exception as e:
                 traceback.print_exc(e)
                 raise _APIErrorResponse(str(e))
